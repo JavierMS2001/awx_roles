@@ -1,0 +1,29 @@
+---
+
+- name: Create directory to backup
+  file:
+          path: /backup
+          state: directory
+          mode: '0755'
+
+- name: Get date time
+  set_fact:
+          timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.time }}"
+
+- name: Create database backup - Debian
+  mysql_db:
+          state: dump
+          name: bdwordpress
+          target: "/backup/bdwordpress-Debian_backup_{{ timestamp }}.sql"
+
+- name: Check backup - Debian
+  stat:
+          path: "/backup/bdwordpress-Debian_backup_{{ timestamp }}.sql"
+  register: result
+
+- name: Import backup to backups_dir - Debian
+  fetch:
+        src: "/backup/bdwordpress-Debian_backup_{{ timestamp }}.sql"
+        dest: "{{ backups_dir }}/Debian-server/"
+        flat: yes
+        when: result is success

@@ -1,0 +1,7 @@
+---
+
+- ansible.builtin.include_tasks: backup_centos.yml
+  when: ansible_os_family == 'CentOS'
+
+- ansible.builtin.include_tasks: backup_debian.yml
+  when: ansible_os_family == 'Debian'

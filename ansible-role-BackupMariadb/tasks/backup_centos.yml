@@ -1,0 +1,31 @@
+---
+- name: Create backup directory
+  file:
+          path: /backup
+          state: directory
+          mode: '0755'
+
+- name: Get date time
+  set_fact:
+          timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.time }}"
+
+
+- name: Create database backup - Centos
+  mysql_db:
+          login_user: root
+          login_password: vagrant
+          state: dump
+          name: bdwordpress
+          target: "/backup/bdwordpress-CentOS_backup_{{ timestamp }}.sql"
+
+- name: Check backup - CentOS
+  stat:
+          path: "/backup/bdwordpress-CentOS_backup_{{ timestamp }}.sql"
+  register: result
+
+- name: Import backup to control node - CentOS
+  fetch:
+        src: "/backup/bdwordpress-CentOS_backup_{{ timestamp }}.sql"
+        dest: "{{ backups_dir }}/CentOS-server/"
+        flat: yes
+        when: result is success
